@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="koditraquinas.repository" name="Koditraquinas Addon Repository" version="0.0.1" provider-name="Kodi Traquinas">
+<addon id="koditraquinas.repository" name="Koditraquinas Repository" version="0.0.1" provider-name="Kodi Traquinas">
 	<extension point="xbmc.addon.repository" name="Kodi Traquinas Addon Repository">
 		<info compressed="false">http://raw.github.com/koditraquinas/koditraquinas.repository/master/addons.xml</info>
 		<checksum>http://raw.github.com/koditraquinas/koditraquinas.repository/master/addons.xml.md5</checksum>
