@@ -1,19 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addons>
-<addon id="koditraquinas.repository" name="Koditraquinas Addon Repository" version="0.0.1" provider-name="Kodi Traquinas">
-	<extension point="xbmc.addon.repository" name="Kodi Traquinas Addon Repository">
-		<info compressed="false">http://raw.github.com/koditraquinas/koditraquinas.repository/master/addons.xml</info>
-		<checksum>http://raw.github.com/koditraquinas/koditraquinas.repository/master/addons.xml.md5</checksum>
-		<datadir zip="true">http://raw.github.com/koditraquinas/koditraquinas.repository/master/repo/</datadir>
-	</extension>
-	<extension point="xbmc.addon.metadata">
-		<summary>Koditraquinas Entertenimento</summary>
-		<description>koditraquinas addons repositorio</description>
-		<disclaimer></disclaimer>
-		<platform>all</platform>
-	</extension>
-</addon>
-
 <addon id="plugin.video.traquinas"
        name="Traquinas"
        version="1.1"
@@ -28,7 +13,7 @@
     <import addon="script.module.youtube.dl" optional="true"/>
     <import addon="plugin.video.youtube" optional="true" />
     <import addon="script.module.urlresolver" optional="true"/>
-    <import addon="script.module.simplejson" />
+    <import addon="script.module.simplejson" />    
      <import addon="script.module.livestreamer" optional="true"/>
   </requires>
   <extension point="xbmc.python.pluginsource" library="default.py">
@@ -43,4 +28,3 @@ Categorias com legendas em [PT].
     <platform>all</platform>
   </extension>
 </addon>
-</addons>
