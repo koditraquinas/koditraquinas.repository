@@ -14,6 +14,21 @@
 	</extension>
 </addon>
 
+<addon id="plugin.video.f4mTester" version="2.2.5" name="f4mTester" provider-name="Shani">
+    <requires>
+        <import addon="xbmc.python" version="2.1.0"/>
+        <import addon="script.video.F4mProxy" version="2.2.3"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary>f4mTester</summary>
+        <description></description>
+        <platform>all</platform>
+    </extension>
+</addon>
+
 <addon id="plugin.video.traquinas"
        name="Traquinas"
        version="1.1"
@@ -42,5 +57,18 @@ Categorias com legendas em [PT].
 [B][COLOR lime]Para que haja um bom funcionamento deste addon, o URL RESOLVER e o F4M TESTER necessitam de estar activos no kodi.[/COLOR][/B]</description>
     <platform>all</platform>
   </extension>
+</addon>
+
+<addon id="script.module.urlresolver" name="URLResolver" version="3.0.1" provider-name="Eldorado">
+	<requires>
+		<import addon="xbmc.python" version="2.1.0" />
+	</requires>
+	<extension point="xbmc.python.module" library="lib" />
+	<extension point="xbmc.python.pluginsource" library="lib/default.py" />
+	<extension point="xbmc.addon.metadata">
+		<platform>all</platform>
+		<summary lang="en">Resolve common video host URL's to be playable in XBMC/Kodi.</summary>
+		<description lang="en">Resolve common video host URL's to be playable in XBMC/Kodi, simplify addon development of video plugins requiring multi video hosts.</description>
+	</extension>
 </addon>
 </addons>
