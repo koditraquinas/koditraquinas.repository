@@ -1,6 +1,7 @@
+# -*- coding: UTF-8 -*-
 """
     Kodi urlresolver plugin
-    Copyright (C) 2014  smokdpi
+    Copyright (C) 2016  alifrezser
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,13 +18,14 @@
 """
 
 import re
+from lib import jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class Mp4EdgeResolver(UrlResolver):
-    name = "mp4edge.com"
-    domains = ["mp4edge.com"]
-    pattern = '(?://|\.)(mp4edge\.com)/stream/([0-9a-zA-Z]+)'
+class WatchonlineResolver(UrlResolver):
+    name = "watchonline"
+    domains = ["watchonline.to"]
+    pattern = '(?://|\.)(watchonline\.to)/(?:embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -33,23 +35,19 @@ class Mp4EdgeResolver(UrlResolver):
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-        self.headers['Referer'] = web_url
-        html = self.net.http_GET(web_url, headers=self.headers).content
-        r = re.search('file\s*:\s*["\'](.+?)["\']', html)
+
+        html = self.net.http_GET(web_url).content
+
+        for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
+            js_data = jsunpack.unpack(match.group(1))
+            js_data = js_data.replace('\\\'', '\'')
+
+        r = re.search('{\s*file\s*:\s*["\']([^{}]+\.mp4)["\']', js_data)
+
         if r:
             return r.group(1)
         else:
             raise ResolverError('File not found')
 
     def get_url(self, host, media_id):
-        return 'http://%s/stream/%s' % (host, media_id)
-
-    def get_host_and_id(self, url):
-        r = re.search(self.pattern, url)
-        if r:
-            return r.groups()
-        else:
-            return False
-
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or self.name in host
+        return 'http://www.%s/embed-%s.html' % (host, media_id)

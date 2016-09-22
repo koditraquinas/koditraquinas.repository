@@ -1,6 +1,6 @@
 """
     urlresolver XBMC Addon
-    Copyright (C) 2016 lambda
+    Copyright (C) 2011 t0mm0
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,48 +16,36 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
 import re
 from lib import jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class IpithosResolver(UrlResolver):
-    name = 'ipithos.to'
-    domains = ['ipithos.to']
-    pattern = '(?://|\.)(ipithos\.to)/(?:embed-)?([0-9a-zA-Z]+)'
+
+class Mp4EngineResolver(UrlResolver):
+    name = "mp4engine"
+    domains = ["mp4engine.com"]
+    pattern = '(?://|\.)(mp4engine\.com)/(?:embed-)?([0-9a-zA-Z]+)(?:-[0-9]x[0-9].html)?'
 
     def __init__(self):
         self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
+        html = self.net.http_GET(web_url).content
 
-        headers = {'User-Agent': common.IOS_USER_AGENT}
+        js_data = re.findall('(eval\(function.*?)</script>', html.replace('\n', ''))
 
-        html = self.net.http_GET(web_url, headers=headers).content
+        for i in js_data:
+            try: html += jsunpack.unpack(i)
+            except: pass
 
-        for match in re.finditer('(eval.*?\)\)\))', html, re.DOTALL):
-            js_data = jsunpack.unpack(match.group(1))
+        match = re.search('''file:(?:\s+|\v+)?['|"]([^'"]+)['|"]''', html)
 
-            stream_url = re.findall('<param\s+name="src"\s*value="([^"]+)', js_data)
-            stream_url += re.findall('file\s*:\s*[\'|\"](.+?)[\'|\"]', js_data)
-            stream_url = [i for i in stream_url if not i.endswith('.srt')]
-
-            if stream_url:
-                return stream_url[0]
+        if match:
+            return match.group(1).replace(" ", "%20")
 
         raise ResolverError('File Not Found or removed')
 
     def get_url(self, host, media_id):
-        return 'http://ipithos.to/embed-%s.html' % media_id
-
-    def get_host_and_id(self, url):
-        r = re.search(self.pattern, url)
-        if r:
-            return r.groups()
-        else:
-            return False
-
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or self.name in host
+        return 'http://%s/embed-%s.html' % (host, media_id)

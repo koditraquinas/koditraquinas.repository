@@ -1,6 +1,6 @@
-"""
+'''
     urlresolver XBMC Addon
-    Copyright (C) 2016 lambda
+    Copyright (C) 2011 t0mm0
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,50 +14,31 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
-
+'''
 
 import re
-from lib import jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class ZettahostResolver(UrlResolver):
-    name = 'zettahost.tv'
-    domains = ['zettahost.tv']
-    pattern = '(?://|\.)(zettahost\.tv)/(?:embed-)?([0-9a-zA-Z]+)'
+class PlayedtoResolver(UrlResolver):
+    name = "playedto"
+    domains = ["playedto.me"]
+    pattern = '(?://|\.)(playedto\.me)/?([0-9A-Za-z]+)'
 
     def __init__(self):
         self.net = common.Net()
 
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
-
-        headers = {'User-Agent': common.IOS_USER_AGENT}
-
-        html = self.net.http_GET(web_url, headers=headers).content
-
-        for match in re.finditer('(eval.*?\)\)\))', html, re.DOTALL):
-            js_data = jsunpack.unpack(match.group(1))
-
-            stream_url = re.findall('<param\s+name="src"\s*value="([^"]+)', js_data)
-            stream_url += re.findall('file\s*:\s*[\'|\"](.+?)[\'|\"]', js_data)
-            stream_url = [i for i in stream_url if not i.endswith('.srt')]
-
+        html = self.net.http_GET(web_url).content
+        match = re.findall('''["']?sources['"]?\s*:\s*\[(.*?)\]''', html)
+        if match:
+            stream_url = re.findall('''['"]?file['"]?\s*:\s*['"]?([^'"]+)''', match[0])
+            stream_url = [i for i in stream_url if not i.endswith('smil')]
             if stream_url:
                 return stream_url[0]
 
         raise ResolverError('File Not Found or removed')
-
+    
     def get_url(self, host, media_id):
-        return 'http://zettahost.tv/embed-%s.html' % media_id
-
-    def get_host_and_id(self, url):
-        r = re.search(self.pattern, url)
-        if r:
-            return r.groups()
-        else:
-            return False
-
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or self.name in host
+        return 'http://playedto.me/embed-%s.html' % media_id

@@ -1,6 +1,6 @@
 '''
-thevideo urlresolver plugin
-Copyright (C) 2014 Eldorado
+    urlresolver XBMC Addon
+    Copyright (C) 2016 Gujal
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -21,10 +21,11 @@ from lib import jsunpack
 from urlresolver import common
 from urlresolver.resolver import UrlResolver, ResolverError
 
-class VidAgResolver(UrlResolver):
-    name = "vid.ag"
-    domains = ["vid.ag"]
-    pattern = '(?://|\.)(vid\.ag)/(?:embed-)?([0-9A-Za-z]+)'
+
+class FastplayResolver(UrlResolver):
+    name = 'fastplay.sx'
+    domains = ['fastplay.sx']
+    pattern = '(?://|\.)(fastplay\.sx)/(?:flash-|embed-)?([0-9a-zA-Z]+)'
 
     def __init__(self):
         self.net = common.Net()
@@ -32,27 +33,25 @@ class VidAgResolver(UrlResolver):
     def get_media_url(self, host, media_id):
         web_url = self.get_url(host, media_id)
         html = self.net.http_GET(web_url).content
-        for match in re.finditer('(eval\(function.*?)</script>', html, re.DOTALL):
-            js_data = jsunpack.unpack(match.group(1))
-            r = re.search('file\s*:\s*"([^"]+)', js_data)
-            if r:
-                return r.group(1)
 
-        r = re.search('file\s*:\s*"([^"]+)', html)
-        if r:
-            return r.group(1)
+        if '404 Not Found' in html:
+            raise ResolverError('File Removed')
 
-        raise ResolverError('File Not Found or removed')
+        if 'Video is processing' in html:
+            raise ResolverError('File still being processed')
+
+        packed = re.search('(eval\(function.*?)\s*</script>', html, re.DOTALL)
+        if packed:
+            js = jsunpack.unpack(packed.group(1))
+        else:
+            js = html
+
+        link = re.search('sources[\d\D]+(http.*?)",label', js)
+        if link:
+            common.log_utils.log_debug('fastplay.sx Link Found: %s' % link.group(1))
+            return link.group(1)
+
+        raise ResolverError('Unable to find fastplay.sx video')
 
     def get_url(self, host, media_id):
-        return 'http://vid.ag/embed-%s.html' % media_id
-
-    def get_host_and_id(self, url):
-        r = re.search(self.pattern, url)
-        if r:
-            return r.groups()
-        else:
-            return False
-
-    def valid_url(self, url, host):
-        return re.search(self.pattern, url) or self.name in host
+        return 'http://%s/embed-%s.html' % (host, media_id)
